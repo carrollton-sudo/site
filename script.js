@@ -1,3 +1,8 @@
+import { injectSpeedInsights } from '@vercel/speed-insights';
+
+// Initialize Vercel Speed Insights
+injectSpeedInsights();
+
 document.addEventListener('DOMContentLoaded', () => {
     const catalogBtn = document.getElementById('view-catalog');
     const fadeOverlay = document.getElementById('fade-overlay');
