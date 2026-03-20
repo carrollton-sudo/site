@@ -1,0 +1,19 @@
+{
+  "name": "36exp",
+  "version": "1.0.0",
+  "description": "Photography portfolio website",
+  "type": "module",
+  "scripts": {
+    "build": "echo 'Static site - no build needed'",
+    "test": "echo 'No tests configured'"
+  },
+  "keywords": [
+    "photography",
+    "portfolio"
+  ],
+  "author": "Castellanos",
+  "license": "MIT",
+  "dependencies": {
+    "@vercel/speed-insights": "^1.0.0"
+  }
+}
