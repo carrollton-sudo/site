@@ -1,0 +1,239 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg-color: #0e0e0e; 
+    --film-color: #000000; 
+    --accent-color: #555;
+    --meta-color: #9c6e43;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--accent-color);
+    font-family: "Inter", "Helvetica Neue", sans-serif;
+    overflow-y: hidden;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+}
+
+#fade-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000000;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 50; 
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: opacity;
+}
+
+#fade-overlay.visible {
+    opacity: 1;
+}
+
+.gallery-container {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    width: max-content;
+    padding-right: 20vw;
+}
+
+.intro {
+    width: 35vw;
+    min-width: 350px;
+    padding-left: 10vw;
+    flex-shrink: 0;
+}
+
+.intro h1 {
+    font-size: 11px;
+    letter-spacing: 0.6em;
+    font-weight: 300;
+    color: #eee;
+    margin-bottom: 8px;
+}
+
+.intro p {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: #444;
+    text-transform: uppercase;
+}
+
+.catalog-btn {
+    margin-top: 35px;
+    background: transparent;
+    border: 1px solid #333;
+    color: #666;
+    padding: 10px 18px;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px; 
+}
+
+.catalog-btn i {
+    font-size: 14px;
+    margin-top: -1px;
+}
+
+.catalog-btn:hover {
+    border-color: var(--meta-color);
+    color: #eee;
+}
+
+.film-roll {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 4.5vh;
+    padding: 7.5vh 0;
+    background-color: var(--film-color);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+}
+
+.leader { width: 15vw; height: 100%; background: var(--film-color); flex-shrink: 0; }
+
+.film-roll::before,
+.film-roll::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1.8vh;
+    background-image: repeating-linear-gradient(
+        90deg, 
+        var(--bg-color) 0, 
+        var(--bg-color) 1.2vh, 
+        transparent 1.2vh, 
+        transparent 3vh
+    );
+    z-index: 2;
+}
+
+.film-roll::before { top: 1.2vh; }
+.film-roll::after { bottom: 1.2vh; }
+
+.frame {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    will-change: transform;
+}
+
+.frame img {
+    height: 52vh;
+    width: auto;
+    display: block;
+    filter: contrast(1.05) brightness(0.9);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.frame:hover img {
+    filter: contrast(1) brightness(1);
+    transform: scale(1.02);
+}
+
+.metadata {
+    position: absolute;
+    bottom: -4vh;
+    left: 0;
+    color: var(--meta-color);
+    font-family: "Courier New", Courier, monospace;
+    font-size: 1.3vh;
+    letter-spacing: 1px;
+    font-weight: bold;
+    opacity: 0.5;
+    text-transform: uppercase;
+    pointer-events: none;
+}
+
+.frame:hover .metadata { opacity: 1; }
+
+body::-webkit-scrollbar { height: 4px; }
+body::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+body::-webkit-scrollbar-thumb:hover { background: var(--meta-color); }
+
+/* --- MOBILE OPTIMIZATION --- */
+@media (max-width: 768px) {
+    body {
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .gallery-container {
+        flex-direction: column;
+        width: 100%;
+        height: auto;
+        padding-right: 0;
+    }
+
+    .intro {
+        width: 100%;
+        padding: 80px 40px;
+        min-width: unset;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .intro p {
+        display: none; /* Hide 'Scroll to explore' on mobile */
+    }
+
+    .film-roll {
+        flex-direction: column;
+        width: 100%;
+        padding: 5vh 0;
+        gap: 8vh;
+    }
+
+    .film-roll::before, .film-roll::after {
+        width: 1.8vh;
+        height: 100%;
+        top: 0;
+        bottom: 0;
+        background-image: repeating-linear-gradient(
+            0deg, 
+            var(--bg-color) 0, 
+            var(--bg-color) 1.2vh, 
+            transparent 1.2vh, 
+            transparent 3vh
+        );
+    }
+
+    .film-roll::before { left: 1.2vh; right: auto; }
+    .film-roll::after { right: 1.2vh; left: auto; }
+
+    .frame img {
+        width: 80vw;
+        height: auto;
+    }
+
+    .leader {
+        display: none;
+    }
+
+    .metadata {
+        position: static;
+        margin-top: 15px;
+        opacity: 1;
+        font-size: 10px;
+    }
+}

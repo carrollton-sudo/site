@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catalog | @_36exp</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="catalog-style.css">
+</head>
+<body class="catalog-page">
+
+    <header class="catalog-header">
+        <div class="header-nav">
+            <div class="nav-left">
+                <a href="index.html" id="nav-link" class="back-link">← Return</a>
+            </div>
+            <div class="nav-center">
+                <h1 id="catalog-title">FULL CATALOG</h1>
+            </div>
+            <div class="nav-right">
+                <div class="header-social">
+                    <a href="https://www.instagram.com/_36exp?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" class="social-link">
+                        <i class="bi bi-instagram"></i>
+                    </a>
+                </div>
+                <div class="layout-toggle">
+                    <button onclick="setLayout('grid')" id="grid-btn" class="active"><i class="bi bi-grid-1x2"></i></button>
+                    <button onclick="setLayout('list')" id="list-btn"><i class="bi bi-view-list"></i></button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="album-grid" id="album-list">
+        <div class="album-card" onclick="openAlbum('PERSPEKTIVA', 15, 18, 'PERSPEKTIVA')">
+            <div class="album-cover" style="background-image: url('#');">
+                <div class="inner-border"></div>
+            </div>
+            <div class="album-info">
+                <h3>PERSPEKTIVA</h3>
+                <p>4 exposures</p>
+            </div>
+        </div>
+
+        <div class="album-card" onclick="openAlbum('SMALMST', 15, 18, 'Sing Me a Lullaby, My Sweet Temptation')">
+            <div class="album-cover" style="background-image: url('SMALMST/18.webp');">
+                <div class="inner-border"></div>
+            </div>
+            <div class="album-info">
+                <h3>Sing Me a Lullaby, My Sweet Temptation</h3>
+                <p>4 exposures</p>
+            </div>
+        </div>
+
+        <div class="album-card" onclick="openAlbum('Section2', 7, 14, 'Section .02')">
+            <div class="album-cover" style="background-image: url('Section2/9.webp');">
+                <div class="inner-border"></div>
+            </div>
+            <div class="album-info">
+                <h3>Entry .02</h3>
+                <p>8 exposures</p>
+            </div>
+        </div>
+
+        <div class="album-card" onclick="openAlbum('Section1', 1, 6, 'Section .01')">
+            <div class="album-cover" style="background-image: url('Section1/4.webp');">
+                <div class="inner-border"></div>
+            </div>
+            <div class="album-info">
+                <h3>Entry .01</h3>
+                <p>6 exposures</p>
+            </div>
+        </div>
+    </main>
+
+    <section id="photo-viewer" class="photo-viewer hidden">
+        <div class="photo-stream" id="photo-stream"></div>
+    </section>
+
+    <div id="photo-modal" class="modal hidden">
+        <div class="modal-top-bar">
+            <div id="frame-num" class="frame-counter">EXP 00</div>
+            <span id="close-btn" class="close-modal">EXIT ×</span>
+        </div>
+
+        <div class="modal-main">
+            <aside class="sidebar-meta">
+                <span id="exif-data"></span>
+            </aside>
+            <div class="viewport" id="viewport">
+                <img class="modal-content" id="modal-img" alt="Artwork" draggable="false">
+            </div>
+        </div>
+
+        <div class="modal-controls">
+            <button id="prev-btn" class="ctrl-btn">PREV</button>
+            <div class="ctrl-divider"></div>
+            <div class="zoom-group">
+                <button id="zoom-out" class="zoom-btn">−</button>
+                <span id="zoom-level" class="zoom-text">100%</span>
+                <button id="zoom-in" class="zoom-btn">+</button>
+            </div>
+            <div class="ctrl-divider"></div>
+            <button id="next-btn" class="ctrl-btn">NEXT</button>
+        </div>
+    </div>
+
+    <script src="catalog-script.js"></script>
+</body>
+</html>
