@@ -19,7 +19,8 @@ const photoData = {
     17: "Canon EOS M50 / Canon EF-M 15-45mm IS STM \n ISO200, 45mm, f/6.3, 1/125s",
     18: "Canon EOS M50 / Canon EF-M 15-45mm IS STM \n ISO2000, 31mm, f/5.6, 1/25s",
     19: "Canon EOS 2000D / Canon EF-S 18-55mm IS II \n ISO250, 29mm, f/5.6, 1/160s",
-    20: "Canon EOS 2000D / Canon EF-S 18-55mm IS II \n ISO3200, 48mm, f/5.6, 1/160s"
+    20: "Canon EOS 2000D / Canon EF-S 18-55mm IS II \n ISO3200, 48mm, f/5.6, 1/160s",
+    21: "Canon EOS 2000D / Canon EF-S 18-55mm IS II \n ISO800, 36mm, f/5.6, 1/160s"
 };
 
 let currentAlbum = { start: 0, end: 0, folder: '' };
