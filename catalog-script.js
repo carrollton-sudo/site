@@ -40,6 +40,8 @@ const modalImg = document.getElementById('modal-img');
 const zoomLevelText = document.getElementById('zoom-level');
 const exifDisplay = document.getElementById('exif-data');
 const frameDisplay = document.getElementById('frame-num');
+const prevBtn = document.getElementById('prev-btn');
+const nextBtn = document.getElementById('next-btn');
 
 /* --- LAYOUT CONTROLS --- */
 function setLayout(mode) {
@@ -56,15 +58,41 @@ function setLayout(mode) {
     }
 }
 
-/* --- ALBUM NAVIGATION --- */
+/* --- ALBUM NAVIGATION & CREATIVE LOADER --- */
 function openAlbum(folder, start, end, title) {
     currentAlbum = { start, end, folder };
     photoStream.innerHTML = '';
+    
+    // Trigger Creative Loader
+    const loader = document.getElementById('creative-loader');
+    const loaderBar = document.getElementById('loader-bar');
+    loader.classList.remove('hidden', 'opening');
+    loaderBar.style.width = '0%';
+    
+    let loadedImages = 0;
+    const totalImages = end - start + 1;
     
     for (let i = start; i <= end; i++) {
         const img = document.createElement('img');
         img.src = `${folder}/${i}.webp`;
         img.className = 'stream-img';
+        img.loading = 'lazy'; // Optimization for heavy/high-res files
+        
+        img.onload = () => {
+            img.classList.add('loaded');
+            loadedImages++;
+            loaderBar.style.width = `${(loadedImages / totalImages) * 100}%`;
+            
+            // "Shutter open" when enough frames load to make it seamless
+            if (loadedImages === totalImages || loadedImages >= 4) {
+                setTimeout(() => loader.classList.add('opening'), 400);
+                setTimeout(() => loader.classList.add('hidden'), 1000); // Fully clear DOM block
+            }
+        };
+        
+        // Failsafe if image is cached or errors out
+        img.onerror = () => { loadedImages++; };
+        
         img.onclick = () => openModal(i);
         photoStream.appendChild(img);
     }
@@ -89,13 +117,29 @@ function closeAlbum() {
 }
 
 /* --- MODAL ENGINE --- */
+function updateModalControls() {
+    prevBtn.disabled = currentIndex <= currentAlbum.start;
+    nextBtn.disabled = currentIndex >= currentAlbum.end;
+}
+
 function openModal(index) {
     currentIndex = index;
-    modalImg.src = `${currentAlbum.folder}/${index}.webp`;
+    modalImg.classList.remove('loaded');
+    
+    // Preload full resolution invisibly to prevent harsh pops
+    const tempImg = new Image();
+    tempImg.src = `${currentAlbum.folder}/${index}.webp`;
+    tempImg.onload = () => {
+        modalImg.src = tempImg.src;
+        modalImg.classList.add('loaded');
+    };
+
     exifDisplay.innerText = photoData[index] || "METADATA \n UNAVAILABLE";
     frameDisplay.innerText = `EXP ${index.toString().padStart(2, '0')}`;
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
+    
+    updateModalControls();
     resetZoom();
 }
 
@@ -104,10 +148,32 @@ function closeModal() {
     document.body.style.overflow = 'auto';
 }
 
-/* --- ZOOM & PAN SYSTEM --- */
+/* --- ZOOM & PAN SYSTEM (WITH BOUNDING BOX FIX) --- */
 function updateTransform() {
+    const viewWidth = viewport.clientWidth;
+    const viewHeight = viewport.clientHeight;
+    
+    // Calculate actual bounds of scaled image compared to viewport
+    const scaledWidth = modalImg.clientWidth * scale;
+    const scaledHeight = modalImg.clientHeight * scale;
+    
+    // Max translation allowed before edge passes viewport bounds
+    const maxTx = Math.max(0, (scaledWidth - viewWidth) / 2);
+    const maxTy = Math.max(0, (scaledHeight - viewHeight) / 2);
+    
+    // Clamp to bounds so image doesn't fly off screen
+    translateX = Math.max(-maxTx, Math.min(maxTx, translateX));
+    translateY = Math.max(-maxTy, Math.min(maxTy, translateY));
+
     modalImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
     zoomLevelText.innerText = `${Math.round(scale * 100)}%`;
+    
+    // Dynamic intuitive cursors
+    if (scale > 1) {
+        modalImg.style.cursor = isDragging ? 'grabbing' : 'grab';
+    } else {
+        modalImg.style.cursor = 'default';
+    }
 }
 
 function resetZoom() {
@@ -116,15 +182,25 @@ function resetZoom() {
 }
 
 document.getElementById('zoom-in').onclick = () => { scale = Math.min(scale + 0.5, 4); updateTransform(); };
-document.getElementById('zoom-out').onclick = () => { scale = Math.max(scale - 0.5, 0.5); updateTransform(); };
+document.getElementById('zoom-out').onclick = () => { scale = Math.max(scale - 0.5, 1); updateTransform(); }; // Prevent going below 100%
+
+// Double click to zoom intuitively
+modalImg.ondblclick = () => {
+    if (scale > 1) {
+        resetZoom();
+    } else {
+        scale = 2; // Default snap-in level
+        updateTransform();
+    }
+};
 
 const viewport = document.getElementById('viewport');
 viewport.onmousedown = (e) => {
     if (scale <= 1) return;
     isDragging = true;
-    modalImg.classList.add('dragging');
     startX = e.clientX - translateX;
     startY = e.clientY - translateY;
+    updateTransform(); // Trigger cursor change
 };
 
 window.onmousemove = (e) => {
@@ -136,17 +212,17 @@ window.onmousemove = (e) => {
 
 window.onmouseup = () => {
     isDragging = false;
-    modalImg.classList.remove('dragging');
+    updateTransform(); // Revert back to 'grab'
 };
 
 /* --- GLOBAL LISTENERS --- */
-document.getElementById('prev-btn').onclick = () => { if (currentIndex > currentAlbum.start) openModal(currentIndex - 1); };
-document.getElementById('next-btn').onclick = () => { if (currentIndex < currentAlbum.end) openModal(currentIndex + 1); };
+prevBtn.onclick = () => { if (currentIndex > currentAlbum.start) openModal(currentIndex - 1); };
+nextBtn.onclick = () => { if (currentIndex < currentAlbum.end) openModal(currentIndex + 1); };
 document.getElementById('close-btn').onclick = closeModal;
 
 window.onkeydown = (e) => {
     if (modal.classList.contains('hidden')) return;
     if (e.key === "Escape") closeModal();
-    if (e.key === "ArrowLeft") document.getElementById('prev-btn').click();
-    if (e.key === "ArrowRight") document.getElementById('next-btn').click();
+    if (e.key === "ArrowLeft") prevBtn.click();
+    if (e.key === "ArrowRight") nextBtn.click();
 };
