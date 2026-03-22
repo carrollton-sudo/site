@@ -8,7 +8,7 @@ const photoData = {
     6: "Canon EOS 2000D / Canon EF-S 18-55m IS II \n ISO100, 49mm, f/14, 1/125s",
     7: "Canon EOS M50 / Canon EF-S 18-55mm IS II \n ISO8000, 53mm, f/8, 1/125s",
     8: "Canon EOS M50 / Canon EF-S 18-55mm IS II \n ISO8000, 55mm, f/8, 1/125s",
-    9: "Canon EOS M50 / Canon EF-M 15-45mm \n ISO3200, 39mm, f/8, 1/80s",
+    9: "Canon EOS M50 / Canon EF-M 15-45mm IS STM \n ISO3200, 39mm, f/8, 1/80s",
     10: "Canon EOS M50 / Canon EF-M 15-45mm IS STM\n ISO200, 19mm, f/6.3, 1/125s",
     11: "Canon EOS M50 / Canon EF-M 15-45mm IS STM \n ISO200, 24mm, f/6.3, 1/125s",
     12: "Canon EOS M50 / Canon EF-M 15-45mm IS STM \n ISO3200, 24mm, f/6.3, 1/125s",
