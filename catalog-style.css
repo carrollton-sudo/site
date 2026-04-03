@@ -193,7 +193,7 @@ body.catalog-page {
 
 /* Watermark / Brand marking common on photo paper borders */
 .contact-sheet::after {
-    content: 'KODAK SAFETY FILM';
+    content: 'SAFETY FILM';
     position: absolute;
     bottom: -11px;
     right: 20px;
