@@ -72,29 +72,69 @@ function openAlbum(folder, start, end, title) {
     let loadedImages = 0;
     const totalImages = end - start + 1;
     
+    let currentSheet = null;
+    let currentStrip = null;
+    let framesCount = 0;
+    
     for (let i = start; i <= end; i++) {
+        // Create a new Contact Sheet Page every 12 images (3 strips of 4)
+        if (framesCount % 12 === 0) {
+            currentSheet = document.createElement('div');
+            currentSheet.className = 'contact-sheet';
+            
+            // Randomly tilt the entire sheet to make it feel authentic
+            const sheetRot = (Math.random() * 2 - 1).toFixed(2); // between -1 and 1 degree
+            currentSheet.style.transform = `rotate(${sheetRot}deg)`;
+            
+            photoStream.appendChild(currentSheet);
+        }
+
+        // Create a new Film Strip every 4 images
+        if (framesCount % 4 === 0) {
+            currentStrip = document.createElement('div');
+            currentStrip.className = 'film-strip';
+            
+            // Randomly offset/tilt the strips slightly inside the sheet like manually cut strips
+            const stripRot = (Math.random() * 1 - 0.5).toFixed(2); 
+            const stripOffsetY = (Math.random() * 4 - 2).toFixed(2);
+            currentStrip.style.transform = `rotate(${stripRot}deg) translateY(${stripOffsetY}px)`;
+            
+            currentSheet.appendChild(currentStrip);
+        }
+
+        const frameDiv = document.createElement('div');
+        frameDiv.className = 'contact-frame';
+
         const img = document.createElement('img');
         img.src = `${folder}/${i}.webp`;
         img.className = 'stream-img';
-        img.loading = 'lazy'; // Optimization for heavy/high-res files
+        img.loading = 'lazy';
         
         img.onload = () => {
             img.classList.add('loaded');
             loadedImages++;
             loaderBar.style.width = `${(loadedImages / totalImages) * 100}%`;
             
-            // "Shutter open" when enough frames load to make it seamless
+            // "Shutter open"
             if (loadedImages === totalImages || loadedImages >= 4) {
                 setTimeout(() => loader.classList.add('opening'), 400);
-                setTimeout(() => loader.classList.add('hidden'), 1000); // Fully clear DOM block
+                setTimeout(() => loader.classList.add('hidden'), 1000); 
             }
         };
         
-        // Failsafe if image is cached or errors out
         img.onerror = () => { loadedImages++; };
-        
         img.onclick = () => openModal(i);
-        photoStream.appendChild(img);
+
+        // Frame indicator like '01A', '02A'
+        const frameNum = document.createElement('div');
+        frameNum.className = 'frame-number';
+        frameNum.innerText = (i - start + 1).toString().padStart(2, '0') + "A";
+
+        frameDiv.appendChild(img);
+        frameDiv.appendChild(frameNum);
+        currentStrip.appendChild(frameDiv);
+
+        framesCount++;
     }
     
     catalogTitle.innerText = title;
@@ -126,7 +166,7 @@ function openModal(index) {
     currentIndex = index;
     modalImg.classList.remove('loaded');
     
-    // Preload full resolution invisibly to prevent harsh pops
+    // Preload full resolution invisibly
     const tempImg = new Image();
     tempImg.src = `${currentAlbum.folder}/${index}.webp`;
     tempImg.onload = () => {
@@ -148,27 +188,23 @@ function closeModal() {
     document.body.style.overflow = 'auto';
 }
 
-/* --- ZOOM & PAN SYSTEM (WITH BOUNDING BOX FIX) --- */
+/* --- ZOOM & PAN SYSTEM --- */
 function updateTransform() {
     const viewWidth = viewport.clientWidth;
     const viewHeight = viewport.clientHeight;
     
-    // Calculate actual bounds of scaled image compared to viewport
     const scaledWidth = modalImg.clientWidth * scale;
     const scaledHeight = modalImg.clientHeight * scale;
     
-    // Max translation allowed before edge passes viewport bounds
     const maxTx = Math.max(0, (scaledWidth - viewWidth) / 2);
     const maxTy = Math.max(0, (scaledHeight - viewHeight) / 2);
     
-    // Clamp to bounds so image doesn't fly off screen
     translateX = Math.max(-maxTx, Math.min(maxTx, translateX));
     translateY = Math.max(-maxTy, Math.min(maxTy, translateY));
 
     modalImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
     zoomLevelText.innerText = `${Math.round(scale * 100)}%`;
     
-    // Dynamic intuitive cursors
     if (scale > 1) {
         modalImg.style.cursor = isDragging ? 'grabbing' : 'grab';
     } else {
@@ -182,14 +218,13 @@ function resetZoom() {
 }
 
 document.getElementById('zoom-in').onclick = () => { scale = Math.min(scale + 0.5, 4); updateTransform(); };
-document.getElementById('zoom-out').onclick = () => { scale = Math.max(scale - 0.5, 1); updateTransform(); }; // Prevent going below 100%
+document.getElementById('zoom-out').onclick = () => { scale = Math.max(scale - 0.5, 1); updateTransform(); }; 
 
-// Double click to zoom intuitively
 modalImg.ondblclick = () => {
     if (scale > 1) {
         resetZoom();
     } else {
-        scale = 2; // Default snap-in level
+        scale = 2;
         updateTransform();
     }
 };
@@ -200,7 +235,7 @@ viewport.onmousedown = (e) => {
     isDragging = true;
     startX = e.clientX - translateX;
     startY = e.clientY - translateY;
-    updateTransform(); // Trigger cursor change
+    updateTransform();
 };
 
 window.onmousemove = (e) => {
@@ -212,7 +247,7 @@ window.onmousemove = (e) => {
 
 window.onmouseup = () => {
     isDragging = false;
-    updateTransform(); // Revert back to 'grab'
+    updateTransform();
 };
 
 /* --- GLOBAL LISTENERS --- */
