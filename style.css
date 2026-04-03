@@ -194,7 +194,7 @@ body::-webkit-scrollbar-thumb:hover { background: var(--meta-color); }
     }
 
     .intro p {
-        display: none; /* Hide 'Scroll to explore' on mobile */
+        display: none; 
     }
 
     .film-roll {
