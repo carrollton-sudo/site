@@ -1,0 +1,33 @@
+{
+  "name": "36exp",
+  "version": "1.0.0",
+  "description": "Photography portfolio website by Castellanos",
+  "main": "script.js",
+  "type": "module",
+  "scripts": {
+    "build": "esbuild script.js catalog-script.js --bundle --outdir=dist --format=esm --splitting",
+    "dev": "esbuild script.js catalog-script.js --bundle --outdir=dist --format=esm --splitting --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/carrollton-sudo/site.git"
+  },
+  "keywords": [
+    "photography",
+    "portfolio",
+    "catalog"
+  ],
+  "author": "Castellanos",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/carrollton-sudo/site/issues"
+  },
+  "homepage": "https://github.com/carrollton-sudo/site#readme",
+  "dependencies": {
+    "@vercel/speed-insights": "^2.0.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.27.4"
+  }
+}

@@ -1,3 +1,8 @@
+import { injectSpeedInsights } from '@vercel/speed-insights';
+
+// Initialize Vercel Speed Insights
+injectSpeedInsights();
+
 /* --- STATE & DATA --- */
 const photoData = {
     1: "Canon EOS 2000D / Canon EF-S 18-55mm IS II \n ISO1600, 33mm, f/4.5, 1/20s",
