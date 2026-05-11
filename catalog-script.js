@@ -1,10 +1,6 @@
 /* --- DATA SOURCE --- */
-// Base link from your "Publish to Web" settings
-const SPREADSHEET_ID = "2PACX-1vRf0MVI2PeSQXePcPhrCiQ9Jr12LbIz2EnkrD5K1zt2ZODy2iS1gTUIcsS45rsce3AjCldPtjmYqrqT";
-
-// Tab IDs: '0' is usually the 1st tab, '1330310243' is usually the 2nd.
-const ALBUM_URL = `https://docs.google.com/spreadsheets/d/e/${SPREADSHEET_ID}/pub?gid=0&output=csv`;
-const METADATA_URL = `https://docs.google.com/spreadsheets/d/e/${SPREADSHEET_ID}/pub?gid=1330310243&output=csv`;
+const ALBUM_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRf0MVI2PeSQXePcPhrCiQ9Jr12LbIz2EnkrD5K1zt2ZODy2iS1gTUIcsS45rsce3AjCldPtjmYqrqT/pub?gid=0&single=true&output=csv";
+const METADATA_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRf0MVI2PeSQXePcPhrCiQ9Jr12LbIz2EnkrD5K1zt2ZODy2iS1gTUIcsS45rsce3AjCldPtjmYqrqT/pub?gid=597809478&single=true&output=csv";
 
 let photoData = {}; 
 let currentAlbum = { start: 0, end: 0, folder: '' };
@@ -16,6 +12,7 @@ let startX, startY, translateX = 0, translateY = 0;
 /* --- DOM ELEMENTS --- */
 const albumList = document.getElementById('album-list');
 const photoStream = document.getElementById('photo-stream');
+const photoViewer = document.getElementById('photo-viewer');
 const catalogTitle = document.getElementById('catalog-title');
 const navLink = document.getElementById('nav-link');
 const modal = document.getElementById('photo-modal');
@@ -32,7 +29,7 @@ window.onload = function() {
 };
 
 function loadData() {
-    // First, load EXIF metadata
+    // 1. Load Metadata
     Papa.parse(METADATA_URL, {
         download: true,
         header: true,
@@ -40,12 +37,12 @@ function loadData() {
             results.data.forEach(row => {
                 if (row.id) photoData[row.id.trim()] = row.exif_data;
             });
-            // After metadata is in memory, load the albums
+            // 2. Load Albums
             loadAlbums();
         },
         error: function(err) {
-            console.error("Metadata Load Error:", err);
-            loadAlbums(); // Try to load albums anyway
+            console.error("Metadata Error:", err);
+            loadAlbums(); 
         }
     });
 }
@@ -56,23 +53,18 @@ function loadAlbums() {
         header: true,
         complete: function(results) {
             renderAlbums(results.data);
-        },
-        error: function(err) {
-            console.error("Album Load Error:", err);
-            albumList.innerHTML = "<p style='text-align:center; padding: 50px;'>Error loading catalog. Please check your spreadsheet connection.</p>";
         }
     });
 }
 
 function renderAlbums(data) {
+    if (!albumList) return;
     albumList.innerHTML = '';
     data.forEach(row => {
         if (!row.title || !row.folder) return; 
 
         const card = document.createElement('div');
         card.className = 'album-card';
-        
-        // Convert spreadsheet strings to numbers
         const start = parseInt(row.start);
         const end = parseInt(row.end);
 
@@ -91,15 +83,16 @@ function renderAlbums(data) {
     });
 }
 
-/* --- ALBUM VIEWER LOGIC --- */
+/* --- ALBUM VIEWER --- */
 function openAlbum(folder, start, end, title) {
     currentAlbum = { start, end, folder };
     photoStream.innerHTML = '';
     
     const loader = document.getElementById('creative-loader');
     const loaderBar = document.getElementById('loader-bar');
+    
     loader.classList.remove('hidden', 'opening');
-    loaderBar.style.width = '0%';
+    if (loaderBar) loaderBar.style.width = '0%';
     
     let loadedImages = 0;
     const totalImages = (end - start) + 1;
@@ -126,15 +119,24 @@ function openAlbum(folder, start, end, title) {
         const img = document.createElement('img');
         img.src = `${folder}/${i}.webp`;
         img.className = 'stream-img';
-        img.loading = 'lazy';
         
         img.onload = () => {
             img.classList.add('loaded');
             loadedImages++;
-            loaderBar.style.width = `${(loadedImages / totalImages) * 100}%`;
-            if (loadedImages >= Math.min(totalImages, 6)) {
-                setTimeout(() => loader.classList.add('opening'), 400);
-                setTimeout(() => loader.classList.add('hidden'), 1000);
+            if (loaderBar) loaderBar.style.width = `${(loadedImages / totalImages) * 100}%`;
+            // Close loader early if some images are ready
+            if (loadedImages >= Math.min(totalImages, 3)) {
+                setTimeout(() => {
+                    loader.classList.add('opening');
+                    setTimeout(() => loader.classList.add('hidden'), 600);
+                }, 400);
+            }
+        };
+
+        img.onerror = () => {
+            loadedImages++;
+            if (loadedImages >= totalImages) {
+                loader.classList.add('hidden');
             }
         };
 
@@ -155,7 +157,8 @@ function openAlbum(folder, start, end, title) {
     
     albumList.classList.add('hidden');
     photoViewer.classList.remove('hidden');
-    document.querySelector('.layout-toggle').style.display = 'none';
+    const toggle = document.querySelector('.layout-toggle');
+    if (toggle) toggle.style.display = 'none';
     window.scrollTo(0,0);
 }
 
@@ -165,10 +168,11 @@ function closeAlbum() {
     navLink.onclick = null;
     albumList.classList.remove('hidden');
     photoViewer.classList.add('hidden');
-    document.querySelector('.layout-toggle').style.display = 'flex';
+    const toggle = document.querySelector('.layout-toggle');
+    if (toggle) toggle.style.display = 'flex';
 }
 
-/* --- MODAL / ZOOM --- */
+/* --- MODAL ENGINE --- */
 function openModal(index) {
     currentIndex = index;
     modalImg.classList.remove('loaded');
@@ -196,7 +200,7 @@ function updateModalControls() {
 
 function updateTransform() {
     modalImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-    zoomLevelText.innerText = `${Math.round(scale * 100)}%`;
+    if (zoomLevelText) zoomLevelText.innerText = `${Math.round(scale * 100)}%`;
 }
 
 function resetZoom() {
