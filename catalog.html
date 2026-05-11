@@ -6,9 +6,11 @@
     <title>Catalog | @_36exp</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="catalog-style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    
     <meta property="og:title" content="36exp | Photography Catalog">
     <meta property="og:description" content="An archive of exposures.">
-    <meta property="og:image" content="Perspektiva/21.webp">
+    <meta property="og:image" content="Album4/21.webp">
     <meta name="twitter:card" content="summary_large_image">
 </head>
 <body class="catalog-page">
@@ -44,47 +46,7 @@
         </div>
     </header>
 
-    <main class="album-grid" id="album-list">
-        <div class="album-card" onclick="openAlbum('Perspektiva', 19, 21, 'Figure.09')">
-            <div class="album-cover" style="background-image: url('Perspektiva/21.webp');">
-                <div class="inner-border"></div>
-            </div>
-            <div class="album-info">
-                <h3>Figure.09</h3>
-                <p>3 exposures</p>
-            </div>
-        </div>
-
-        <div class="album-card" onclick="openAlbum('SMALMST', 15, 18, 'Sing Me a Lullaby, My Sweet Temptation')">
-            <div class="album-cover" style="background-image: url('SMALMST/18.webp');">
-                <div class="inner-border"></div>
-            </div>
-            <div class="album-info">
-                <h3>Sing Me a Lullaby, My Sweet Temptation</h3>
-                <p>4 exposures</p>
-            </div>
-        </div>
-
-        <div class="album-card" onclick="openAlbum('Section2', 7.5, 13, 'Origin II')">
-            <div class="album-cover" style="background-image: url('Section2/9.webp');">
-                <div class="inner-border"></div>
-            </div>
-            <div class="album-info">
-                <h3>Origin II</h3>
-                <p>8 exposures</p>
-            </div>
-        </div>
-
-        <div class="album-card" onclick="openAlbum('Section1', 1, 7, 'Origin I')">
-            <div class="album-cover" style="background-image: url('Section1/4.webp');">
-                <div class="inner-border"></div>
-            </div>
-            <div class="album-info">
-                <h3>Origin I</h3>
-                <p>6 exposures</p>
-            </div>
-        </div>
-    </main>
+    <main class="album-grid" id="album-list"></main>
 
     <section id="photo-viewer" class="photo-viewer hidden">
         <div class="photo-stream" id="photo-stream"></div>
