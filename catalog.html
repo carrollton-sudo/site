@@ -9,6 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 </head>
 <body class="catalog-page">
+
     <div id="creative-loader" class="creative-loader hidden">
         <div class="shutter-top"></div>
         <div class="shutter-bottom"></div>
@@ -20,8 +21,12 @@
 
     <header class="catalog-header">
         <div class="header-nav">
-            <div class="nav-left"><a href="index.html" id="nav-link" class="back-link">← Return</a></div>
-            <div class="nav-center"><h1 id="catalog-title">FULL CATALOG</h1></div>
+            <div class="nav-left">
+                <a href="index.html" id="nav-link" class="back-link">← Return</a>
+            </div>
+            <div class="nav-center">
+                <h1 id="catalog-title">FULL CATALOG</h1>
+            </div>
             <div class="nav-right">
                 <div class="layout-toggle">
                     <button onclick="setLayout('grid')" id="grid-btn" class="active"><i class="bi bi-grid-1x2"></i></button>
@@ -43,7 +48,9 @@
             <span id="close-btn" class="close-modal">EXIT ×</span>
         </div>
         <div class="modal-main">
-            <aside class="sidebar-meta"><span id="exif-data"></span></aside>
+            <aside class="sidebar-meta">
+                <span id="exif-data"></span>
+            </aside>
             <div class="viewport" id="viewport">
                 <img class="modal-content" id="modal-img" alt="Artwork" draggable="false">
             </div>
@@ -60,6 +67,7 @@
             <button id="next-btn" class="ctrl-btn">NEXT</button>
         </div>
     </div>
+
     <script src="catalog-script.js"></script>
 </body>
 </html>
