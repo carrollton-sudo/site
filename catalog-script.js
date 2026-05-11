@@ -1,28 +1,12 @@
-/* --- STATE & DATA --- */
-const photoData = {
-    1: "Canon EOS 2000D / Canon EF-S 18-55mm IS II \n ISO1600, 33mm, f/4.5, 1/20s",
-    2: "Canon EOS 2000D / Canon EF-S 18-55mm IS II \n ISO800, 30mm, f/5.6, 1/30s",
-    3: "Canon EOS 2000D / Canon EF-S 18-55mm IS II \n ISO1600, 27mm, f/5.6, 1/30s",
-    4: "Canon EOS 2000D / Canon EF-S 18-55mm IS II \n ISO6400, 50mm, f/5.6, 1/40s",
-    5: "Canon EOS 2000D / Canon EF-S 18-55mm IS II \n ISO3200, 34mm, f/8, 1/200s",
-    6: "Canon EOS 2000D / Canon EF-S 18-55m IS II \n ISO100, 49mm, f/14, 1/125s",
-    7: "Canon EOS M50 / Canon EF-S 18-55mm IS II \n ISO8000, 53mm, f/8, 1/125s",
-    8: "Canon EOS M50 / Canon EF-S 18-55mm IS II \n ISO8000, 55mm, f/8, 1/125s",
-    9: "Canon EOS M50 / Canon EF-M 15-45mm IS STM \n ISO3200, 39mm, f/8, 1/80s",
-    10: "Canon EOS M50 / Canon EF-M 15-45mm IS STM\n ISO200, 19mm, f/6.3, 1/125s",
-    11: "Canon EOS M50 / Canon EF-M 15-45mm IS STM \n ISO200, 24mm, f/6.3, 1/125s",
-    12: "Canon EOS M50 / Canon EF-M 15-45mm IS STM \n ISO3200, 24mm, f/6.3, 1/125s",
-    13: "Canon EOS M50 / Canon EF-M 15-45mm IS STM \n ISO3200, 19mm, f/6.3, 1/125s",
-    14: "Canon EOS 2000D / Canon EF-S 18-55mm IS II \n ISO800, 18mm, f/5.6, 1/125s",
-    15: "Canon EOS M50 / Canon EF-M 15-45mm IS STM \n ISO800, 27mm, f/4.5, 1/100s",
-    16: "Canon EOS M50 / Canon EF-M 15-45mm IS STM \n ISO800, 15mm, f/3.5, 1/100s",
-    17: "Canon EOS M50 / Canon EF-M 15-45mm IS STM \n ISO200, 45mm, f/6.3, 1/125s",
-    18: "Canon EOS M50 / Canon EF-M 15-45mm IS STM \n ISO2000, 31mm, f/5.6, 1/25s",
-    19: "Canon EOS 2000D / Canon EF-S 18-55mm IS II \n ISO250, 29mm, f/5.6, 1/160s",
-    20: "Canon EOS 2000D / Canon EF-S 18-55mm IS II \n ISO3200, 48mm, f/5.6, 1/160s",
-    21: "Canon EOS 2000D / Canon EF-S 18-55mm IS II \n ISO800, 36mm, f/5.6, 1/160s"
-};
+/* --- DATA SOURCE --- */
+const BASE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRf0MVI2PeSQXePcPhrCiQ9Jr12LbIz2EnkrD5K1zt2ZODy2iS1gTUIcsS45rsce3AjCldPtjmYqrqT/pub?output=csv";
 
+// Tab IDs (gid). 0 is usually the first tab. 
+// If your metadata is the second tab, the URL needs that specific ID.
+const ALBUM_SHEET_URL = BASE_URL + "&gid=0"; 
+const METADATA_SHEET_URL = BASE_URL + "&gid=1330310243"; // This is the standard ID for a second tab, but &gid=0 works for the first.
+
+let photoData = {}; 
 let currentAlbum = { start: 0, end: 0, folder: '' };
 let currentIndex = 0;
 let scale = 1;
@@ -30,9 +14,8 @@ let isDragging = false;
 let startX, startY, translateX = 0, translateY = 0;
 
 /* --- DOM ELEMENTS --- */
-const photoStream = document.getElementById('photo-stream');
 const albumList = document.getElementById('album-list');
-const photoViewer = document.getElementById('photo-viewer');
+const photoStream = document.getElementById('photo-stream');
 const catalogTitle = document.getElementById('catalog-title');
 const navLink = document.getElementById('nav-link');
 const modal = document.getElementById('photo-modal');
@@ -43,27 +26,68 @@ const frameDisplay = document.getElementById('frame-num');
 const prevBtn = document.getElementById('prev-btn');
 const nextBtn = document.getElementById('next-btn');
 
-/* --- LAYOUT CONTROLS --- */
-function setLayout(mode) {
-    const gridBtn = document.getElementById('grid-btn');
-    const listBtn = document.getElementById('list-btn');
-    if (mode === 'list') {
-        albumList.classList.add('list-mode');
-        listBtn.classList.add('active');
-        gridBtn.classList.remove('active');
-    } else {
-        albumList.classList.remove('list-mode');
-        gridBtn.classList.add('active');
-        listBtn.classList.remove('active');
-    }
+/* --- INITIALIZATION --- */
+window.onload = function() {
+    loadData();
+};
+
+async function loadData() {
+    // 1. Load Metadata First
+    Papa.parse(METADATA_SHEET_URL, {
+        download: true,
+        header: true,
+        complete: function(results) {
+            results.data.forEach(row => {
+                if (row.id) photoData[row.id] = row.exif_data;
+            });
+            // 2. Load Albums after metadata is ready
+            loadAlbums();
+        }
+    });
 }
 
-/* --- ALBUM NAVIGATION & CREATIVE LOADER --- */
+function loadAlbums() {
+    Papa.parse(ALBUM_SHEET_URL, {
+        download: true,
+        header: true,
+        complete: function(results) {
+            renderAlbums(results.data);
+        }
+    });
+}
+
+function renderAlbums(data) {
+    albumList.innerHTML = '';
+    data.forEach(row => {
+        if (!row.title) return; // Skip empty rows
+
+        const card = document.createElement('div');
+        card.className = 'album-card';
+        card.onclick = () => openAlbum(
+            row.folder, 
+            parseInt(row.start), 
+            parseInt(row.end), 
+            row.title
+        );
+
+        card.innerHTML = `
+            <div class="album-cover" style="background-image: url('${row.folder}/${row.cover_img}');">
+                <div class="inner-border"></div>
+            </div>
+            <div class="album-info">
+                <h3>${row.title}</h3>
+                <p>${parseInt(row.end) - parseInt(row.start) + 1} exposures</p>
+            </div>
+        `;
+        albumList.appendChild(card);
+    });
+}
+
+/* --- ALBUM LOGIC --- */
 function openAlbum(folder, start, end, title) {
     currentAlbum = { start, end, folder };
     photoStream.innerHTML = '';
     
-    // Trigger Creative Loader
     const loader = document.getElementById('creative-loader');
     const loaderBar = document.getElementById('loader-bar');
     loader.classList.remove('hidden', 'opening');
@@ -71,34 +95,20 @@ function openAlbum(folder, start, end, title) {
     
     let loadedImages = 0;
     const totalImages = end - start + 1;
-    
     let currentSheet = null;
     let currentStrip = null;
     let framesCount = 0;
     
     for (let i = start; i <= end; i++) {
-        // Create a new Contact Sheet Page every 12 images (3 strips of 4)
         if (framesCount % 12 === 0) {
             currentSheet = document.createElement('div');
             currentSheet.className = 'contact-sheet';
-            
-            // Randomly tilt the entire sheet to make it feel authentic
-            const sheetRot = (Math.random() * 2 - 1).toFixed(2); // between -1 and 1 degree
-            currentSheet.style.transform = `rotate(${sheetRot}deg)`;
-            
             photoStream.appendChild(currentSheet);
         }
 
-        // Create a new Film Strip every 4 images
         if (framesCount % 4 === 0) {
             currentStrip = document.createElement('div');
             currentStrip.className = 'film-strip';
-            
-            // Randomly offset/tilt the strips slightly inside the sheet like manually cut strips
-            const stripRot = (Math.random() * 1 - 0.5).toFixed(2); 
-            const stripOffsetY = (Math.random() * 4 - 2).toFixed(2);
-            currentStrip.style.transform = `rotate(${stripRot}deg) translateY(${stripOffsetY}px)`;
-            
             currentSheet.appendChild(currentStrip);
         }
 
@@ -114,18 +124,14 @@ function openAlbum(folder, start, end, title) {
             img.classList.add('loaded');
             loadedImages++;
             loaderBar.style.width = `${(loadedImages / totalImages) * 100}%`;
-            
-            // "Shutter open"
-            if (loadedImages === totalImages || loadedImages >= 4) {
+            if (loadedImages >= Math.min(totalImages, 6)) {
                 setTimeout(() => loader.classList.add('opening'), 400);
-                setTimeout(() => loader.classList.add('hidden'), 1000); 
+                setTimeout(() => loader.classList.add('hidden'), 1000);
             }
         };
-        
-        img.onerror = () => { loadedImages++; };
+
         img.onclick = () => openModal(i);
 
-        // Frame indicator like '01A', '02A'
         const frameNum = document.createElement('div');
         frameNum.className = 'frame-number';
         frameNum.innerText = (i - start + 1).toString().padStart(2, '0') + "A";
@@ -133,7 +139,6 @@ function openAlbum(folder, start, end, title) {
         frameDiv.appendChild(img);
         frameDiv.appendChild(frameNum);
         currentStrip.appendChild(frameDiv);
-
         framesCount++;
     }
     
@@ -150,37 +155,26 @@ function openAlbum(folder, start, end, title) {
 function closeAlbum() {
     catalogTitle.innerText = "FULL CATALOG";
     navLink.innerText = "← RETURN";
-    navLink.onclick = null; 
+    navLink.onclick = null;
     albumList.classList.remove('hidden');
     photoViewer.classList.add('hidden');
     document.querySelector('.layout-toggle').style.display = 'flex';
 }
 
 /* --- MODAL ENGINE --- */
-function updateModalControls() {
-    prevBtn.disabled = currentIndex <= currentAlbum.start;
-    nextBtn.disabled = currentIndex >= currentAlbum.end;
-}
-
 function openModal(index) {
     currentIndex = index;
     modalImg.classList.remove('loaded');
+    modalImg.src = `${currentAlbum.folder}/${index}.webp`;
+    modalImg.onload = () => modalImg.classList.add('loaded');
     
-    // Preload full resolution invisibly
-    const tempImg = new Image();
-    tempImg.src = `${currentAlbum.folder}/${index}.webp`;
-    tempImg.onload = () => {
-        modalImg.src = tempImg.src;
-        modalImg.classList.add('loaded');
-    };
-
-    exifDisplay.innerText = photoData[index] || "METADATA \n UNAVAILABLE";
+    exifDisplay.innerText = photoData[index] || "METADATA NOT FOUND";
     frameDisplay.innerText = `EXP ${index.toString().padStart(2, '0')}`;
+    
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
-    
-    updateModalControls();
     resetZoom();
+    updateModalControls();
 }
 
 function closeModal() {
@@ -188,28 +182,16 @@ function closeModal() {
     document.body.style.overflow = 'auto';
 }
 
-/* --- ZOOM & PAN SYSTEM --- */
-function updateTransform() {
-    const viewWidth = viewport.clientWidth;
-    const viewHeight = viewport.clientHeight;
-    
-    const scaledWidth = modalImg.clientWidth * scale;
-    const scaledHeight = modalImg.clientHeight * scale;
-    
-    const maxTx = Math.max(0, (scaledWidth - viewWidth) / 2);
-    const maxTy = Math.max(0, (scaledHeight - viewHeight) / 2);
-    
-    translateX = Math.max(-maxTx, Math.min(maxTx, translateX));
-    translateY = Math.max(-maxTy, Math.min(maxTy, translateY));
+function updateModalControls() {
+    prevBtn.disabled = currentIndex <= currentAlbum.start;
+    nextBtn.disabled = currentIndex >= currentAlbum.end;
+}
 
+/* --- ZOOM/PAN --- */
+function updateTransform() {
     modalImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
     zoomLevelText.innerText = `${Math.round(scale * 100)}%`;
-    
-    if (scale > 1) {
-        modalImg.style.cursor = isDragging ? 'grabbing' : 'grab';
-    } else {
-        modalImg.style.cursor = 'default';
-    }
+    modalImg.style.cursor = scale > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default';
 }
 
 function resetZoom() {
@@ -218,46 +200,12 @@ function resetZoom() {
 }
 
 document.getElementById('zoom-in').onclick = () => { scale = Math.min(scale + 0.5, 4); updateTransform(); };
-document.getElementById('zoom-out').onclick = () => { scale = Math.max(scale - 0.5, 1); updateTransform(); }; 
-
-modalImg.ondblclick = () => {
-    if (scale > 1) {
-        resetZoom();
-    } else {
-        scale = 2;
-        updateTransform();
-    }
-};
-
-const viewport = document.getElementById('viewport');
-viewport.onmousedown = (e) => {
-    if (scale <= 1) return;
-    isDragging = true;
-    startX = e.clientX - translateX;
-    startY = e.clientY - translateY;
-    updateTransform();
-};
-
-window.onmousemove = (e) => {
-    if (!isDragging) return;
-    translateX = e.clientX - startX;
-    translateY = e.clientY - startY;
-    updateTransform();
-};
-
-window.onmouseup = () => {
-    isDragging = false;
-    updateTransform();
-};
-
-/* --- GLOBAL LISTENERS --- */
+document.getElementById('zoom-out').onclick = () => { scale = Math.max(scale - 0.5, 1); updateTransform(); };
+document.getElementById('close-btn').onclick = closeModal;
 prevBtn.onclick = () => { if (currentIndex > currentAlbum.start) openModal(currentIndex - 1); };
 nextBtn.onclick = () => { if (currentIndex < currentAlbum.end) openModal(currentIndex + 1); };
-document.getElementById('close-btn').onclick = closeModal;
 
-window.onkeydown = (e) => {
-    if (modal.classList.contains('hidden')) return;
-    if (e.key === "Escape") closeModal();
-    if (e.key === "ArrowLeft") prevBtn.click();
-    if (e.key === "ArrowRight") nextBtn.click();
-};
+function setLayout(mode) {
+    if (mode === 'list') albumList.classList.add('list-mode');
+    else albumList.classList.remove('list-mode');
+}
