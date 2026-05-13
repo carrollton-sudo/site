@@ -15,25 +15,22 @@
             --text-main: #eeeeee;
             --text-muted: #777777;
             --danger: #4a1515;
-            --danger-hover: #6b1e1e;
             --success: #1b4a22;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
         body {
             background-color: var(--bg-base);
             color: var(--text-main);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            padding-top: 80px; /* Space for fixed header */
+            font-family: -apple-system, system-ui, sans-serif;
+            padding-top: 80px;
             padding-bottom: 60px;
         }
 
-        /* --- STICKY HEADER --- */
         .admin-header {
             position: fixed;
             top: 0; left: 0; width: 100%;
-            background: rgba(5, 5, 5, 0.9);
+            background: rgba(5, 5, 5, 0.95);
             backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--border);
             padding: 16px 40px;
@@ -43,20 +40,10 @@
             z-index: 1000;
         }
 
-        .header-brand {
-            font-size: 14px;
-            letter-spacing: 0.2em;
-            text-transform: uppercase;
-            font-weight: 600;
-        }
+        .header-brand { font-size: 12px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--accent); }
 
-        .header-controls {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
+        .header-controls { display: flex; gap: 15px; align-items: center; }
 
-        /* --- FORMS & BUTTONS --- */
         input {
             background: var(--bg-input);
             border: 1px solid var(--border);
@@ -64,195 +51,118 @@
             padding: 10px 14px;
             border-radius: 4px;
             font-size: 13px;
-            font-family: inherit;
-            width: 100%;
-            transition: border-color 0.2s;
         }
-        
-        input:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-
-        .token-input { width: 300px; }
 
         .btn {
             background: var(--bg-input);
             border: 1px solid var(--border);
             color: var(--text-main);
-            padding: 10px 16px;
+            padding: 10px 18px;
             border-radius: 4px;
-            font-size: 12px;
+            font-size: 11px;
             letter-spacing: 0.1em;
             text-transform: uppercase;
             cursor: pointer;
-            transition: all 0.2s;
-            font-weight: 600;
+            font-weight: 700;
         }
 
-        .btn:hover { background: #222; }
-        
-        .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-        .btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
-        
-        .btn-save { background: var(--success); border-color: var(--success); }
-        .btn-save:hover { background: #266b31; border-color: #266b31; }
-        
-        .btn-danger { background: transparent; border-color: var(--danger); color: #ff6b6b; }
-        .btn-danger:hover { background: var(--danger); }
-        
-        .btn-icon { padding: 8px 12px; }
+        .btn-save { background: var(--success); border-color: transparent; }
+        .btn-primary { background: var(--accent); border-color: transparent; color: white; }
+        .btn-danger { color: #ff6b6b; border-color: var(--danger); }
 
-        /* --- MAIN CONTAINER --- */
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
+        .container { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
 
-        /* --- ALBUM CARDS --- */
         .album-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 40px;
         }
 
-        .album-header-grid {
+        .album-grid {
             display: grid;
             grid-template-columns: 2fr 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 30px;
+            gap: 15px;
+            margin-bottom: 20px;
         }
 
-        .input-group label {
+        .input-wrapper label {
             display: block;
-            font-size: 10px;
+            font-size: 9px;
             text-transform: uppercase;
-            letter-spacing: 0.15em;
             color: var(--text-muted);
-            margin-bottom: 8px;
-        }
-
-        .album-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 15px;
-            margin-bottom: 15px;
-        }
-        
-        .album-actions h3 {
-            font-size: 14px;
-            font-weight: 500;
-            letter-spacing: 0.05em;
-        }
-
-        /* --- PHOTO LIST --- */
-        .photo-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+            margin-bottom: 6px;
+            letter-spacing: 1px;
         }
 
         .photo-row {
             display: grid;
-            grid-template-columns: 40px 120px 1fr 90px 40px;
-            gap: 15px;
+            grid-template-columns: 40px 120px 1fr 80px 40px;
+            gap: 12px;
             align-items: center;
-            background: var(--bg-base);
-            border: 1px solid var(--border);
-            padding: 8px 15px;
-            border-radius: 4px;
+            background: rgba(255,255,255,0.03);
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 6px;
         }
 
-        .photo-index {
-            font-family: "Courier New", monospace;
-            font-size: 12px;
-            color: var(--accent);
-            font-weight: bold;
-        }
+        .photo-index { font-family: monospace; color: var(--accent); font-size: 12px; }
 
-        .sort-controls {
-            display: flex;
-            gap: 5px;
+        .global-add {
+            width: 100%; padding: 30px;
+            background: transparent; border: 1px dashed var(--border);
+            color: var(--text-muted); cursor: pointer; border-radius: 12px;
         }
-
-        .global-add-btn {
-            display: block;
-            width: 100%;
-            padding: 20px;
-            background: transparent;
-            border: 2px dashed var(--border);
-            color: var(--text-muted);
-            font-size: 14px;
-            text-align: center;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: 0.2s;
-        }
-        .global-add-btn:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-        }
-
-        /* Loading Overlay */
-        #loader {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.8);
-            display: none; justify-content: center; align-items: center; z-index: 2000;
-            font-size: 14px; letter-spacing: 0.2em; color: var(--accent);
+        
+        #status-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+            display: none; justify-content: center; align-items: center;
+            z-index: 9999; letter-spacing: 3px; font-size: 12px;
         }
     </style>
 </head>
 <body>
 
-    <div id="loader">SYNCING TO REPOSITORY...</div>
+    <div id="status-overlay">COMMITTING CHANGES...</div>
 
     <header class="admin-header">
-        <div class="header-brand">36EXP | Asset Manager</div>
+        <div class="header-brand">36EXP STUDIO // ADMIN</div>
         <div class="header-controls">
-            <input type="password" id="gh-token" class="token-input" placeholder="Paste GitHub Token here">
-            <button class="btn btn-save" onclick="saveToGithub()">Commit to Live Site</button>
+            <input type="password" id="gh-token" style="width: 250px;" placeholder="GITHUB TOKEN">
+            <button class="btn btn-save" onclick="saveToGithub()">Update Live Site</button>
         </div>
     </header>
 
     <div class="container">
         <div id="album-list"></div>
-        <button class="global-add-btn" onclick="addAlbum()">+ CREATE NEW ALBUM</button>
+        <button class="global-add" onclick="addAlbum()">+ ADD NEW COLLECTION</button>
     </div>
 
     <script>
         let config = { albums: [] };
-        
-        // ---------------------------------------------------------
-        // IMPORTANT: CHANGE THIS TO YOUR GITHUB USERNAME AND REPO!
-        const repo = "carroltton-sudo/site"; 
-        // ---------------------------------------------------------
+        // UPDATE THESE TWO LINES
+        const username = "carroltton-sudo";
+        const repoName = "site";
 
-        async function loadConfig() {
+        async function init() {
             try {
                 const res = await fetch('config.json');
                 if (res.ok) config = await res.json();
-            } catch (e) {
-                console.log("No config found, initializing empty workspace.");
-            }
-            render();
+                render();
+            } catch (e) { console.log("Fresh start"); render(); }
         }
 
         function addAlbum() {
-            config.albums.push({ title: "Untitled Album", folder: "AlbumX", cover: "1.webp", photos: [] });
+            config.albums.push({ title: "New Album", folder: "Album1", cover: "1.webp", photos: [] });
             render();
         }
 
-        function bulkAdd(aIdx) {
-            const range = prompt("Enter file range (e.g. 1-24):");
+        function bulkAdd(idx) {
+            const range = prompt("Photo Range (e.g. 1-24):");
             if(!range) return;
             const [s, e] = range.split('-').map(Number);
-            if (!s || !e || s > e) return alert("Invalid range format.");
-            for(let i=s; i<=e; i++) config.albums[aIdx].photos.push({ file: `${i}.webp`, exif: "" });
+            for(let i=s; i<=e; i++) config.albums[idx].photos.push({ file: `${i}.webp`, exif: "" });
             render();
         }
 
@@ -264,43 +174,40 @@
         }
 
         function render() {
-            const list = document.getElementById('album-list');
-            list.innerHTML = config.albums.map((a, aIdx) => `
+            const container = document.getElementById('album-list');
+            container.innerHTML = config.albums.map((a, aIdx) => `
                 <div class="album-card">
-                    <div class="album-header-grid">
-                        <div class="input-group">
+                    <div class="album-grid">
+                        <div class="input-wrapper">
                             <label>Album Title</label>
-                            <input value="${a.title}" oninput="config.albums[${aIdx}].title=this.value" placeholder="e.g. Origin I">
+                            <input value="${a.title}" oninput="config.albums[${aIdx}].title=this.value">
                         </div>
-                        <div class="input-group">
-                            <label>Source Folder</label>
-                            <input value="${a.folder}" oninput="config.albums[${aIdx}].folder=this.value" placeholder="e.g. Album1">
+                        <div class="input-wrapper">
+                            <label>GitHub Folder</label>
+                            <input value="${a.folder}" oninput="config.albums[${aIdx}].folder=this.value">
                         </div>
-                        <div class="input-group">
-                            <label>Cover Image</label>
-                            <input value="${a.cover}" oninput="config.albums[${aIdx}].cover=this.value" placeholder="e.g. 1.webp">
+                        <div class="input-wrapper">
+                            <label>Cover Filename</label>
+                            <input value="${a.cover}" oninput="config.albums[${aIdx}].cover=this.value">
                         </div>
                     </div>
-
-                    <div class="album-actions">
-                        <h3>EXPOSURES (${a.photos.length})</h3>
-                        <div style="display: flex; gap: 10px;">
-                            <button class="btn" onclick="bulkAdd(${aIdx})">Bulk Add Range</button>
-                            <button class="btn btn-danger" onclick="if(confirm('Delete entire album?')) { config.albums.splice(${aIdx}, 1); render(); }">Delete Album</button>
-                        </div>
+                    
+                    <div style="display:flex; justify-content:space-between; margin-bottom: 20px;">
+                        <button class="btn btn-primary" onclick="bulkAdd(${aIdx})">Bulk Add Range</button>
+                        <button class="btn btn-danger" onclick="config.albums.splice(${aIdx},1);render()">Delete Album</button>
                     </div>
 
                     <div class="photo-list">
                         ${a.photos.map((p, pIdx) => `
                             <div class="photo-row">
-                                <span class="photo-index">${String(pIdx+1).padStart(2, '0')}A</span>
-                                <input value="${p.file}" oninput="config.albums[${aIdx}].photos[${pIdx}].file=this.value" placeholder="File">
-                                <input value="${p.exif}" oninput="config.albums[${aIdx}].photos[${pIdx}].exif=this.value" placeholder="EXIF string (e.g. Canon EOS M50...)">
-                                <div class="sort-controls">
-                                    <button class="btn btn-icon" title="Move Up" onclick="move(${aIdx},${pIdx},-1)">↑</button>
-                                    <button class="btn btn-icon" title="Move Down" onclick="move(${aIdx},${pIdx},1)">↓</button>
+                                <span class="photo-index">${String(pIdx+1).padStart(2,'0')}</span>
+                                <input value="${p.file}" oninput="config.albums[${aIdx}].photos[${pIdx}].file=this.value">
+                                <input placeholder="EXIF DATA" value="${p.exif}" oninput="config.albums[${aIdx}].photos[${pIdx}].exif=this.value">
+                                <div style="display:flex; gap:4px">
+                                    <button class="btn" style="padding:5px 10px" onclick="move(${aIdx},${pIdx},-1)">↑</button>
+                                    <button class="btn" style="padding:5px 10px" onclick="move(${aIdx},${pIdx},1)">↓</button>
                                 </div>
-                                <button class="btn btn-danger btn-icon" title="Remove Photo" onclick="config.albums[${aIdx}].photos.splice(${pIdx},1);render()">✕</button>
+                                <button class="btn btn-danger" style="padding:5px 10px" onclick="config.albums[${aIdx}].photos.splice(${pIdx},1);render()">✕</button>
                             </div>
                         `).join('')}
                     </div>
@@ -310,56 +217,42 @@
 
         async function saveToGithub() {
             const token = document.getElementById('gh-token').value;
-            if(!token) return alert("Please paste your GitHub Token at the top.");
-            if(repo === "YOUR_USERNAME/YOUR_REPO_NAME") return alert("Developer error: Update 'repo' string in admin.html code.");
-
-            document.getElementById('loader').style.display = 'flex';
-            let sha = null;
+            if(!token) return alert("Enter Token");
             
+            document.getElementById('status-overlay').style.display = 'flex';
+            const path = "config.json";
+            const url = `https://api.github.com/repos/${username}/${repoName}/contents/${path}`;
+            
+            let sha = null;
             try {
-                const getRes = await fetch(`https://api.github.com/repos/${repo}/contents/config.json`, {
-                    headers: { 'Authorization': `token ${token}` }
-                });
-                if (getRes.ok) {
-                    const fileData = await getRes.json();
-                    sha = fileData.sha;
+                const check = await fetch(url, { headers: { 'Authorization': `token ${token}` } });
+                if (check.ok) {
+                    const data = await check.json();
+                    sha = data.sha;
                 }
-            } catch (e) {
-                console.log("Creating new config file.");
+            } catch(e) {}
+
+            const content = btoa(unescape(encodeURIComponent(JSON.stringify(config, null, 2))));
+            
+            const response = await fetch(url, {
+                method: 'PUT',
+                headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: "Studio Update",
+                    content: content,
+                    sha: sha // If null, GitHub creates the file
+                })
+            });
+
+            document.getElementById('status-overlay').style.display = 'none';
+            if(response.ok) alert("Update Successful.");
+            else {
+                const err = await response.json();
+                alert("Error: " + err.message);
             }
-
-            const jsonString = JSON.stringify(config, null, 2);
-            const base64Content = btoa(unescape(encodeURIComponent(jsonString)));
-
-            const payload = {
-                message: "Catalog updated via Studio Manager",
-                content: base64Content
-            };
-            if (sha) payload.sha = sha;
-
-            try {
-                const putRes = await fetch(`https://api.github.com/repos/${repo}/contents/config.json`, {
-                    method: 'PUT',
-                    headers: { 
-                        'Authorization': `token ${token}`, 
-                        'Content-Type': 'application/json' 
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                if (putRes.ok) {
-                    alert("Sync Successful. Vercel is rebuilding your site now.");
-                } else {
-                    const err = await putRes.json();
-                    alert(`Sync Failed: ${err.message}`);
-                }
-            } catch (error) {
-                alert(`Network error: ${error.message}`);
-            }
-            document.getElementById('loader').style.display = 'none';
         }
 
-        loadConfig();
+        init();
     </script>
 </body>
 </html>
