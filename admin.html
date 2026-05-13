@@ -2,104 +2,86 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>36exp | Studio Admin</title>
+    <title>Admin | 36exp Studio</title>
     <style>
-        :root { --bg: #0a0a0a; --card: #141414; --border: #262626; --accent: #9c6e43; --text: #e5e5e5; }
-        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; padding: 2rem; margin: 0; }
-        .admin-wrap { max-width: 1000px; margin: 0 auto; }
-        
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
-        .btn { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 13px; transition: opacity 0.2s; }
-        .btn-outline { background: transparent; border: 1px solid var(--border); }
-        .btn-danger { background: #451a1a; color: #ff8080; }
-        
-        .album-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 2rem; position: relative; }
-        .grid-inputs { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #737373; margin-bottom: 8px; }
-        input { background: #1a1a1a; border: 1px solid var(--border); color: white; padding: 10px; border-radius: 6px; width: 100%; box-sizing: border-box; }
-        
-        .photo-manager { margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px; }
-        .photo-row { display: grid; grid-template-columns: 50px 100px 1fr 100px 40px; gap: 10px; align-items: center; background: #1a1a1a; padding: 10px; margin-bottom: 8px; border-radius: 6px; }
-        .photo-row span { font-size: 12px; color: #737373; font-family: monospace; }
-        
-        #code-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; padding: 50px; z-index: 9999; }
-        #code-output { width: 100%; height: 70vh; background: #000; color: #0f0; padding: 20px; font-family: monospace; border: 1px solid var(--border); }
+        :root { --bg: #0f0f0f; --card: #1a1a1a; --accent: #9c6e43; --text: #fff; --border: #333; }
+        body { background: var(--bg); color: var(--text); font-family: sans-serif; padding: 2rem; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; }
+        .album { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 2rem; }
+        .inputs { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        input { background: #000; border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 4px; }
+        .photo-row { display: grid; grid-template-columns: 50px 100px 1fr 80px 40px; gap: 10px; align-items: center; padding: 5px; border-bottom: 1px solid #222; }
+        .btn { cursor: pointer; padding: 10px 20px; border: none; border-radius: 4px; font-weight: bold; }
+        .btn-save { background: #22c55e; color: #fff; }
+        .btn-add { background: var(--accent); color: #fff; }
+        .btn-danger { background: #441111; color: #ff5555; }
     </style>
 </head>
 <body>
-    <div class="admin-wrap">
+    <div class="container">
         <div class="header">
-            <h1>Studio Admin</h1>
+            <h1>Album Manager</h1>
             <div>
-                <button class="btn btn-outline" onclick="loadExisting()">Import Current data.json</button>
-                <button class="btn" onclick="generateCode()" style="background: #22c55e;">Confirm & Get Code</button>
+                <input type="password" id="gh-token" placeholder="GitHub Token">
+                <button class="btn btn-save" onclick="saveToGithub()">Save Changes to Site</button>
             </div>
         </div>
-
-        <div id="album-container"></div>
-        <button class="btn" onclick="addAlbum()">+ Create New Album</button>
-    </div>
-
-    <div id="code-modal">
-        <h2 style="margin-top:0">Copy this code to your data.json on GitHub</h2>
-        <textarea id="code-output" readonly></textarea>
-        <div style="margin-top: 20px; text-align: right;">
-            <button class="btn" onclick="copyCode()">Copy to Clipboard</button>
-            <button class="btn btn-outline" onclick="document.getElementById('code-modal').style.display='none'">Close</button>
-        </div>
+        <div id="album-list"></div>
+        <button class="btn btn-add" onclick="addAlbum()">+ New Album</button>
     </div>
 
     <script>
-        let data = { albums: [] };
+        let config = { albums: [] };
+        const repo = "YOUR_USERNAME/YOUR_REPO_NAME"; // UPDATE THIS
 
-        function addAlbum() {
-            data.albums.push({ title: "New Album", folder: "Album1", cover: "1.webp", photos: [] });
+        async function loadConfig() {
+            const res = await fetch('config.json');
+            config = await res.json();
             render();
         }
 
-        function bulkAdd(idx) {
-            const range = prompt("Enter photo range (e.g., 1-50):");
-            if (!range) return;
-            const [start, end] = range.split('-').map(Number);
-            for (let i = start; i <= end; i++) {
-                data.albums[idx].photos.push({ file: `${i}.webp`, exif: "" });
-            }
+        function addAlbum() {
+            config.albums.push({ title: "New Album", folder: "AlbumX", cover: "1.webp", photos: [] });
+            render();
+        }
+
+        function bulkAdd(aIdx) {
+            const range = prompt("Range (e.g. 1-20):");
+            if(!range) return;
+            const [s, e] = range.split('-').map(Number);
+            for(let i=s; i<=e; i++) config.albums[aIdx].photos.push({ file: `${i}.webp`, exif: "" });
             render();
         }
 
         function move(aIdx, pIdx, dir) {
-            const arr = data.albums[aIdx].photos;
-            if (pIdx + dir < 0 || pIdx + dir >= arr.length) return;
-            [arr[pIdx], arr[pIdx + dir]] = [arr[pIdx + dir], arr[pIdx]];
+            const p = config.albums[aIdx].photos;
+            if(pIdx+dir < 0 || pIdx+dir >= p.length) return;
+            [p[pIdx], p[pIdx+dir]] = [p[pIdx+dir], p[pIdx]];
             render();
         }
 
         function render() {
-            const container = document.getElementById('album-container');
-            container.innerHTML = data.albums.map((album, aIdx) => `
-                <div class="album-card">
-                    <button class="btn btn-danger" style="position:absolute; top:24px; right:24px;" onclick="data.albums.splice(${aIdx},1);render()">Delete Album</button>
-                    <div class="grid-inputs">
-                        <div><label>Album Title</label><input value="${album.title}" oninput="data.albums[${aIdx}].title=this.value"></div>
-                        <div><label>Folder Name</label><input value="${album.folder}" oninput="data.albums[${aIdx}].folder=this.value"></div>
-                        <div><label>Cover Img</label><input value="${album.cover}" oninput="data.albums[${aIdx}].cover=this.value"></div>
+            const list = document.getElementById('album-list');
+            list.innerHTML = config.albums.map((a, aIdx) => `
+                <div class="album">
+                    <div class="inputs">
+                        <input value="${a.title}" oninput="config.albums[${aIdx}].title=this.value" placeholder="Title">
+                        <input value="${a.folder}" oninput="config.albums[${aIdx}].folder=this.value" placeholder="Folder">
+                        <input value="${a.cover}" oninput="config.albums[${aIdx}].cover=this.value" placeholder="Cover">
                     </div>
-                    
-                    <div class="photo-manager">
-                        <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
-                            <h3>Photos (${album.photos.length})</h3>
-                            <button class="btn btn-outline" onclick="bulkAdd(${aIdx})">Bulk Add Range</button>
-                        </div>
-                        ${album.photos.map((p, pIdx) => `
+                    <button class="btn" onclick="bulkAdd(${aIdx})">Bulk Add Photos</button>
+                    <div style="margin-top:15px">
+                        ${a.photos.map((p, pIdx) => `
                             <div class="photo-row">
                                 <span>#${pIdx+1}</span>
-                                <input value="${p.file}" oninput="data.albums[${aIdx}].photos[${pIdx}].file=this.value">
-                                <input placeholder="EXIF Metadata" value="${p.exif}" oninput="data.albums[${aIdx}].photos[${pIdx}].exif=this.value">
-                                <div style="display:flex; gap:5px;">
-                                    <button class="btn btn-outline" style="padding:5px 10px" onclick="move(${aIdx},${pIdx},-1)">↑</button>
-                                    <button class="btn btn-outline" style="padding:5px 10px" onclick="move(${aIdx},${pIdx},1)">↓</button>
+                                <input value="${p.file}" oninput="config.albums[${aIdx}].photos[${pIdx}].file=this.value">
+                                <input value="${p.exif}" oninput="config.albums[${aIdx}].photos[${pIdx}].exif=this.value" placeholder="EXIF">
+                                <div>
+                                    <button onclick="move(${aIdx},${pIdx},-1)">↑</button>
+                                    <button onclick="move(${aIdx},${pIdx},1)">↓</button>
                                 </div>
-                                <button class="btn btn-danger" style="padding:5px" onclick="data.albums[${aIdx}].photos.splice(${pIdx},1);render()">✕</button>
+                                <button class="btn-danger" onclick="config.albums[${aIdx}].photos.splice(${pIdx},1);render()">X</button>
                             </div>
                         `).join('')}
                     </div>
@@ -107,21 +89,31 @@
             `).join('');
         }
 
-        function loadExisting() {
-            fetch('data.json').then(r => r.json()).then(d => { data = d; render(); });
+        async function saveToGithub() {
+            const token = document.getElementById('gh-token').value;
+            if(!token) return alert("Enter Token");
+
+            // Get current file SHA (required by GitHub API to update)
+            const getRes = await fetch(`https://api.github.com/repos/${repo}/contents/config.json`, {
+                headers: { 'Authorization': `token ${token}` }
+            });
+            const fileData = await getRes.json();
+
+            const putRes = await fetch(`https://api.github.com/repos/${repo}/contents/config.json`, {
+                method: 'PUT',
+                headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: "Update gallery via Admin Dashboard",
+                    content: btoa(JSON.stringify(config, null, 2)),
+                    sha: fileData.sha
+                })
+            });
+
+            if(putRes.ok) alert("Site Updating! Give Vercel a minute to rebuild.");
+            else alert("Error saving. Check token/repo path.");
         }
 
-        function generateCode() {
-            document.getElementById('code-output').value = JSON.stringify(data, null, 2);
-            document.getElementById('code-modal').style.display = 'block';
-        }
-
-        function copyCode() {
-            const copyText = document.getElementById("code-output");
-            copyText.select();
-            document.execCommand("copy");
-            alert("Code copied! Now paste it into your data.json file on GitHub.");
-        }
+        loadConfig();
     </script>
 </body>
 </html>
