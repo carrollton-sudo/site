@@ -1,15 +1,13 @@
 {
   "albums": [
     {
-      "id": "album_5",
+      "id": "album_sakura",
       "title": "Sakura 桜",
       "folder": "Album5",
       "cover": "22.webp",
       "photos": [
         { "file": "22.webp", "exif": "Canon EOS M50 / Canon EF-M 15-45mm IS STM \n ISO100, 43mm, f/8, 1/125s" },
-        { "file": "23.webp", "exif": "Canon EOS 2000D / Canon EF-S 18-55mm IS II \n ISO100, 18mm, f/3.5, 1/400s" },
-        { "file": "24.webp", "exif": "Canon EOS 2000D / Canon EF-S 18-55mm IS II \n ISO100, 30mm, f/5.6, 1/200s" },
-        { "file": "25.webp", "exif": "Canon EOS M50 / Canon EF-M 15-45mm IS STM \n ISO100, 43mm, f/8, 1/125s" }
+        { "file": "23.webp", "exif": "Canon EOS 2000D / Canon EF-S 18-55mm IS II \n ISO100, 18mm, f/3.5, 1/400s" }
       ]
     }
   ]
