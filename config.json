@@ -2,7 +2,7 @@
   "albums": [
     {
       "title": "Album1",
-      "folder": "Album1",
+      "folder": "Section1",
       "cover": "1.webp",
       "photos": [
         {
