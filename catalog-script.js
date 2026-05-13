@@ -1,9 +1,6 @@
 let catalogData = { albums: [] };
 let currentAlbum = null;
 let currentIndex = 0;
-let scale = 1;
-let isDragging = false;
-let startX, startY, translateX = 0, translateY = 0;
 
 const albumList = document.getElementById('album-list');
 const photoStream = document.getElementById('photo-stream');
@@ -21,6 +18,8 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(data => {
             catalogData = data;
             renderAlbums();
+        }).catch(() => {
+            albumList.innerHTML = "<p style='text-align:center; grid-column: 1/-1;'>No data found. Use admin.html to create your first album.</p>";
         });
 });
 
@@ -45,46 +44,35 @@ function renderAlbums() {
 function openAlbum(album) {
     currentAlbum = album;
     photoStream.innerHTML = '';
-    
     const loader = document.getElementById('creative-loader');
-    loader.classList.remove('hidden', 'opening');
+    loader.classList.remove('hidden');
     
     album.photos.forEach((photo, idx) => {
-        // Simple logic to group into film strips (reusing your layout logic)
         const frameDiv = document.createElement('div');
         frameDiv.className = 'contact-frame';
         const img = document.createElement('img');
         img.src = `${album.folder}/${photo.file}`;
         img.className = 'stream-img';
         img.onclick = () => openModal(idx);
-        
         frameDiv.appendChild(img);
         photoStream.appendChild(frameDiv);
     });
 
     catalogTitle.innerText = album.title;
     navLink.innerText = "← CLOSE ALBUM";
-    navLink.onclick = (e) => { e.preventDefault(); closeAlbum(); };
+    navLink.onclick = (e) => { e.preventDefault(); location.reload(); };
     albumList.classList.add('hidden');
     photoViewer.classList.remove('hidden');
-    setTimeout(() => loader.classList.add('hidden'), 800);
-}
-
-function closeAlbum() {
-    location.reload(); // Simplest way to reset state
+    setTimeout(() => loader.classList.add('hidden'), 500);
 }
 
 function openModal(index) {
     currentIndex = index;
     const photo = currentAlbum.photos[index];
     modalImg.src = `${currentAlbum.folder}/${photo.file}`;
-    exifDisplay.innerText = photo.exif || "NO EXIF";
-    frameDisplay.innerText = `EXP ${photo.file.replace('.webp', '')}`;
+    exifDisplay.innerText = photo.exif || "METADATA UNAVAILABLE";
+    frameDisplay.innerText = `EXP ${photo.file.split('.')[0].padStart(2, '0')}`;
     modal.classList.remove('hidden');
-    updateModalControls();
-}
-
-function updateModalControls() {
     document.getElementById('prev-btn').disabled = currentIndex === 0;
     document.getElementById('next-btn').disabled = currentIndex === currentAlbum.photos.length - 1;
 }
