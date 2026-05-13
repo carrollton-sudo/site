@@ -18,8 +18,6 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(data => {
             catalogData = data;
             renderAlbums();
-        }).catch(e => {
-            console.error("No config.json found.");
         });
 });
 
@@ -44,8 +42,6 @@ function renderAlbums() {
 function openAlbum(album) {
     currentAlbum = album;
     photoStream.innerHTML = '';
-    
-    // Create the visual Film Strip structure
     let currentSheet = null;
     let currentStrip = null;
     
@@ -60,22 +56,19 @@ function openAlbum(album) {
             currentStrip.className = 'film-strip';
             currentSheet.appendChild(currentStrip);
         }
-
         const frame = document.createElement('div');
         frame.className = 'contact-frame';
-        
         const img = document.createElement('img');
         img.src = `${album.folder}/${photo.file}`;
         img.className = 'stream-img';
         
-        // CRITICAL FIX: Make photos visible
+        // FORCING VISIBILITY
         img.onload = () => img.classList.add('loaded');
         img.onclick = () => openModal(idx);
         
         const num = document.createElement('div');
         num.className = 'frame-number';
         num.innerText = `${idx + 1}A`;
-
         frame.appendChild(img);
         frame.appendChild(num);
         currentStrip.appendChild(frame);
@@ -84,7 +77,6 @@ function openAlbum(album) {
     catalogTitle.innerText = album.title;
     navLink.innerText = "← CLOSE";
     navLink.onclick = () => location.reload();
-    
     albumList.classList.add('hidden');
     photoViewer.classList.remove('hidden');
     window.scrollTo(0,0);
