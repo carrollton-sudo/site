@@ -2,29 +2,103 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catalog Admin Dashboard</title>
-    <link rel="stylesheet" href="admin.css">
+    <title>36exp | Admin Dashboard</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; background: #111; color: #eee; padding: 40px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
+        .album-block { background: #1a1a1a; border: 1px solid #333; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .album-meta { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; margin-bottom: 20px; }
+        input, textarea { background: #222; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 4px; width: 100%; box-sizing: border-box; }
+        .photo-row { display: grid; grid-template-columns: 80px 1fr auto auto; gap: 10px; align-items: center; padding: 8px 0; border-top: 1px solid #222; }
+        .btn { cursor: pointer; padding: 10px 15px; border-radius: 4px; border: none; font-weight: bold; }
+        .btn-primary { background: #9c6e43; color: white; }
+        .btn-danger { background: #442222; color: #ff8888; }
+        .bulk-add { background: #222; padding: 15px; margin: 10px 0; border-radius: 4px; border: 1px dashed #444; }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Album Management Dashboard</h1>
-        <div class="actions">
-            <button onclick="document.getElementById('file-upload').click()" class="btn secondary">Load Existing data.json</button>
-            <input type="file" id="file-upload" accept=".json" style="display:none" onchange="loadJson(event)">
-            <button onclick="exportJson()" class="btn primary">Export Configuration</button>
-        </div>
-    </header>
-
-    <main>
-        <section class="controls">
-            <button onclick="addAlbum()" class="btn">+ Add New Album</button>
-        </section>
-        
-        <div id="dashboard-container">
+    <div class="container">
+        <div class="header">
+            <h1>Catalog Admin</h1>
+            <div>
+                <button class="btn" onclick="document.getElementById('import').click()">Load data.json</button>
+                <input type="file" id="import" style="display:none" onchange="importData(event)">
+                <button class="btn btn-primary" onclick="exportData()">Export data.json</button>
             </div>
-    </main>
+        </div>
 
-    <script src="admin.js"></script>
+        <div id="album-container"></div>
+        <button class="btn btn-primary" onclick="addAlbum()">+ New Album</button>
+    </div>
+
+    <script>
+        let data = { albums: [] };
+
+        function addAlbum() {
+            data.albums.push({ title: "", folder: "AlbumX", cover: "1.webp", photos: [] });
+            render();
+        }
+
+        function bulkAdd(albumIdx) {
+            const range = prompt("Enter range (e.g., 1-25):");
+            if (!range) return;
+            const [start, end] = range.split('-').map(Number);
+            for (let i = start; i <= end; i++) {
+                data.albums[albumIdx].photos.push({ file: `${i}.webp`, exif: "" });
+            }
+            render();
+        }
+
+        function move(albumIdx, photoIdx, dir) {
+            const arr = data.albums[albumIdx].photos;
+            if (photoIdx + dir < 0 || photoIdx + dir >= arr.length) return;
+            [arr[photoIdx], arr[photoIdx + dir]] = [arr[photoIdx + dir], arr[photoIdx]];
+            render();
+        }
+
+        function render() {
+            const container = document.getElementById('album-container');
+            container.innerHTML = data.albums.map((album, aIdx) => `
+                <div class="album-block">
+                    <div class="album-meta">
+                        <input placeholder="Title" value="${album.title}" oninput="data.albums[${aIdx}].title=this.value">
+                        <input placeholder="Folder (e.g. Album1)" value="${album.folder}" oninput="data.albums[${aIdx}].folder=this.value">
+                        <input placeholder="Cover Filename" value="${album.cover}" oninput="data.albums[${aIdx}].cover=this.value">
+                        <button class="btn btn-danger" onclick="data.albums.splice(${aIdx},1);render()">Delete</button>
+                    </div>
+                    <div class="bulk-add">
+                        <button class="btn" onclick="bulkAdd(${aIdx})">Bulk Add Photos by Range</button>
+                    </div>
+                    ${album.photos.map((p, pIdx) => `
+                        <div class="photo-row">
+                            <span>${p.file}</span>
+                            <input placeholder="EXIF" value="${p.exif}" oninput="data.albums[${aIdx}].photos[${pIdx}].exif=this.value">
+                            <div>
+                                <button onclick="move(${aIdx},${pIdx},-1)">↑</button>
+                                <button onclick="move(${aIdx},${pIdx},1)">↓</button>
+                            </div>
+                            <button class="btn btn-danger" onclick="data.albums[${aIdx}].photos.splice(${pIdx},1);render()">X</button>
+                        </div>
+                    `).join('')}
+                </div>
+            `).join('');
+        }
+
+        function exportData() {
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "data.json";
+            a.click();
+        }
+
+        function importData(e) {
+            const reader = new FileReader();
+            reader.onload = (event) => { data = JSON.parse(event.target.result); render(); };
+            reader.readAsText(e.target.files[0]);
+        }
+    </script>
 </body>
 </html>
