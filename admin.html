@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catalog Admin Dashboard</title>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <header>
+        <h1>Album Management Dashboard</h1>
+        <div class="actions">
+            <button onclick="document.getElementById('file-upload').click()" class="btn secondary">Load Existing data.json</button>
+            <input type="file" id="file-upload" accept=".json" style="display:none" onchange="loadJson(event)">
+            <button onclick="exportJson()" class="btn primary">Export Configuration</button>
+        </div>
+    </header>
+
+    <main>
+        <section class="controls">
+            <button onclick="addAlbum()" class="btn">+ Add New Album</button>
+        </section>
+        
+        <div id="dashboard-container">
+            </div>
+    </main>
+
+    <script src="admin.js"></script>
+</body>
+</html>
