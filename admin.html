@@ -2,44 +2,44 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>36exp // Studio Manager</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>36EXP // Studio Manager</title>
     <style>
         :root { --bg: #050505; --card: #111; --border: #222; --accent: #9c6e43; --text: #fff; }
         body { background: var(--bg); color: var(--text); font-family: sans-serif; padding-top: 100px; }
-        header { position: fixed; top: 0; width: 100%; background: rgba(5,5,5,0.9); border-bottom: 1px solid var(--border); padding: 20px 40px; display: flex; justify-content: space-between; z-index: 100; }
+        header { position: fixed; top: 0; left: 0; width: 100%; background: rgba(5,5,5,0.9); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
         .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
-        .album-card { background: var(--card); border: 1px solid var(--border); padding: 25px; margin-bottom: 30px; border-radius: 8px; }
-        input { background: #1a1a1a; border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 4px; width: 100%; margin-top: 5px; }
-        .btn { padding: 10px 20px; cursor: pointer; border: none; border-radius: 4px; font-weight: bold; text-transform: uppercase; font-size: 11px; }
+        .album-card { background: var(--card); border: 1px solid var(--border); padding: 25px; margin-bottom: 30px; border-radius: 12px; }
+        input { background: #1a1a1a; border: 1px solid var(--border); color: #fff; padding: 12px; border-radius: 6px; width: 100%; margin-top: 5px; font-size: 14px; }
+        .btn { padding: 12px 20px; cursor: pointer; border: none; border-radius: 4px; font-weight: bold; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; transition: 0.2s; }
         .btn-save { background: #238636; color: white; }
         .btn-add { background: var(--accent); color: white; }
-        .photo-row { display: grid; grid-template-columns: 100px 1fr 100px 40px; gap: 10px; margin-top: 10px; align-items: center; }
-        #overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .btn-danger { background: #441111; color: #ff7b7b; }
+        .photo-row { display: grid; grid-template-columns: 80px 1fr 1fr 40px; gap: 10px; margin-top: 10px; align-items: center; background: #000; padding: 10px; border-radius: 6px; }
+        #status { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 1000; letter-spacing: 4px; }
+        label { font-size: 10px; text-transform: uppercase; color: #666; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div id="overlay">SYNCING...</div>
+<div id="status">PUSHING TO REPO...</div>
 
 <header>
-    <div style="letter-spacing: 2px;">36EXP // ADMIN</div>
-    <div>
-        <input type="password" id="token" placeholder="PASTE NEW GHP_ TOKEN HERE" style="width: 300px; margin: 0 10px 0 0;">
-        <button class="btn btn-save" onclick="save()">Save to GitHub</button>
+    <div style="letter-spacing: 4px; font-weight: 900; color: var(--accent);">36EXP STUDIO</div>
+    <div style="display: flex; gap: 10px;">
+        <input type="password" id="token" placeholder="GITHUB TOKEN" style="width: 250px; margin: 0;">
+        <button class="btn btn-save" onclick="save()">Save Changes</button>
     </div>
 </header>
 
 <div class="container">
-    <div id="albums"></div>
-    <button class="btn btn-add" onclick="addAlbum()" style="width:100%">+ New Album</button>
+    <div id="albums-container"></div>
+    <button class="btn btn-add" onclick="addAlbum()" style="width:100%; padding: 20px; margin-top: 20px;">+ Create New Album</button>
 </div>
 
 <script>
     let config = { albums: [] };
-    
-    // --- CONFIGURE THIS ---
     const repo = "carroltton-sudo/site"; 
-    // ----------------------
 
     async function init() {
         try {
@@ -50,12 +50,12 @@
     }
 
     function addAlbum() {
-        config.albums.push({ title: "New Album", folder: "Section1", cover: "1.webp", photos: [] });
+        config.albums.push({ title: "New Collection", folder: "Album1", cover: "1.webp", photos: [] });
         render();
     }
 
     function bulkAdd(idx) {
-        const range = prompt("Range (e.g. 1-10):");
+        const range = prompt("Range (e.g. 1-12):");
         if(!range) return;
         const [s, e] = range.split('-').map(Number);
         for(let i=s; i<=e; i++) config.albums[idx].photos.push({ file: `${i}.webp`, exif: "" });
@@ -63,21 +63,25 @@
     }
 
     function render() {
-        const container = document.getElementById('albums');
+        const container = document.getElementById('albums-container');
         container.innerHTML = config.albums.map((a, aIdx) => `
             <div class="album-card">
-                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
-                    <div><label>Title</label><input value="${a.title}" oninput="config.albums[${aIdx}].title=this.value"></div>
-                    <div><label>Folder</label><input value="${a.folder}" oninput="config.albums[${aIdx}].folder=this.value"></div>
-                    <div><label>Cover</label><input value="${a.cover}" oninput="config.albums[${aIdx}].cover=this.value"></div>
+                <div style="display:grid; grid-template-columns: 2fr 1fr 1fr; gap: 15px;">
+                    <div><label>Album Title</label><input value="${a.title}" oninput="config.albums[${aIdx}].title=this.value"></div>
+                    <div><label>Folder Path</label><input value="${a.folder}" oninput="config.albums[${aIdx}].folder=this.value"></div>
+                    <div><label>Cover Filename</label><input value="${a.cover}" oninput="config.albums[${aIdx}].cover=this.value"></div>
                 </div>
-                <button class="btn btn-add" style="margin-top:15px" onclick="bulkAdd(${aIdx})">Add 1-10 Photos</button>
-                <div id="photos-${aIdx}">
+                <div style="margin-top: 20px; display: flex; justify-content: space-between;">
+                    <button class="btn btn-add" onclick="bulkAdd(${aIdx})">Bulk Add Photos</button>
+                    <button class="btn btn-danger" onclick="if(confirm('Delete album?')){config.albums.splice(${aIdx},1);render()}">Delete Album</button>
+                </div>
+                <div style="margin-top: 20px;">
                     ${a.photos.map((p, pIdx) => `
                         <div class="photo-row">
-                            <input value="${p.file}" oninput="config.albums[${aIdx}].photos[${pIdx}].file=this.value">
-                            <input placeholder="EXIF" value="${p.exif}" oninput="config.albums[${aIdx}].photos[${pIdx}].exif=this.value">
-                            <button class="btn" onclick="config.albums[${aIdx}].photos.splice(${pIdx},1);render()">X</button>
+                            <span style="font-family:monospace; color:var(--accent)">#${pIdx+1}</span>
+                            <input value="${p.file}" oninput="config.albums[${aIdx}].photos[${pIdx}].file=this.value" placeholder="file.webp">
+                            <input value="${p.exif}" oninput="config.albums[${aIdx}].photos[${pIdx}].exif=this.value" placeholder="EXIF Data">
+                            <button class="btn btn-danger" style="padding: 5px 10px;" onclick="config.albums[${aIdx}].photos.splice(${pIdx},1);render()">✕</button>
                         </div>
                     `).join('')}
                 </div>
@@ -87,16 +91,14 @@
 
     async function save() {
         const token = document.getElementById('token').value.trim();
-        if(!token) return alert("Paste your token first!");
+        if(!token) return alert("Missing Token");
         
-        document.getElementById('overlay').style.display = 'flex';
+        document.getElementById('status').style.display = 'flex';
         const url = `https://api.github.com/repos/${repo}/contents/config.json`;
         
         let sha = null;
         try {
-            const getFile = await fetch(url, { 
-                headers: { 'Authorization': `Bearer ${token}` } 
-            });
+            const getFile = await fetch(url, { headers: { 'Authorization': `token ${token}` } });
             if (getFile.ok) {
                 const data = await getFile.json();
                 sha = data.sha;
@@ -105,22 +107,19 @@
 
         const res = await fetch(url, {
             method: 'PUT',
-            headers: { 
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json' 
-            },
+            headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                message: "Update gallery",
+                message: "Studio Update",
                 content: btoa(unescape(encodeURIComponent(JSON.stringify(config, null, 2)))),
                 sha: sha
             })
         });
 
-        document.getElementById('overlay').style.display = 'none';
-        if(res.ok) alert("Success! Check your site in a minute.");
+        document.getElementById('status').style.display = 'none';
+        if(res.ok) alert("SUCCESS. Site is rebuilding.");
         else {
             const err = await res.json();
-            alert("GitHub Error: " + err.message + "\n\nTry generating a NEW token with 'repo' permissions.");
+            alert("GITHUB ERROR: " + err.message);
         }
     }
     init();
