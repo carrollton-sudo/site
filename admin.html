@@ -33,11 +33,23 @@
 
     <script>
         let config = { albums: [] };
-        const repo = "carrollton-sudo/site"; // UPDATE THIS
+        
+        // ---------------------------------------------------------
+        // IMPORTANT: CHANGE THIS TO YOUR GITHUB USERNAME AND REPO!
+        // Example: "johndoe/photography-portfolio"
+        const repo = "YOUR_USERNAME/YOUR_REPO_NAME"; 
+        // ---------------------------------------------------------
 
         async function loadConfig() {
-            const res = await fetch('config.json');
-            config = await res.json();
+            try {
+                // Try fetching the live one
+                const res = await fetch('config.json');
+                if (res.ok) {
+                    config = await res.json();
+                }
+            } catch (e) {
+                console.log("No config found yet, starting fresh.");
+            }
             render();
         }
 
@@ -67,10 +79,11 @@
                 <div class="album">
                     <div class="inputs">
                         <input value="${a.title}" oninput="config.albums[${aIdx}].title=this.value" placeholder="Title">
-                        <input value="${a.folder}" oninput="config.albums[${aIdx}].folder=this.value" placeholder="Folder">
-                        <input value="${a.cover}" oninput="config.albums[${aIdx}].cover=this.value" placeholder="Cover">
+                        <input value="${a.folder}" oninput="config.albums[${aIdx}].folder=this.value" placeholder="Folder (e.g. Album1)">
+                        <input value="${a.cover}" oninput="config.albums[${aIdx}].cover=this.value" placeholder="Cover file (e.g. 1.webp)">
                     </div>
                     <button class="btn" onclick="bulkAdd(${aIdx})">Bulk Add Photos</button>
+                    <button class="btn btn-danger" onclick="config.albums.splice(${aIdx}, 1); render()" style="float:right;">Delete Album</button>
                     <div style="margin-top:15px">
                         ${a.photos.map((p, pIdx) => `
                             <div class="photo-row">
@@ -91,26 +104,55 @@
 
         async function saveToGithub() {
             const token = document.getElementById('gh-token').value;
-            if(!token) return alert("Enter Token");
+            if(!token) return alert("Please enter your GitHub Token!");
+            if(repo === "carrollton-sudo/site") return alert("You forgot to change the repo name in the code!");
 
-            // Get current file SHA (required by GitHub API to update)
-            const getRes = await fetch(`https://api.github.com/repos/${repo}/contents/config.json`, {
-                headers: { 'Authorization': `token ${token}` }
-            });
-            const fileData = await getRes.json();
+            let sha = null;
+            
+            // 1. Get the current file's SHA (GitHub requires this to update an existing file)
+            try {
+                const getRes = await fetch(`https://api.github.com/repos/${repo}/contents/config.json`, {
+                    headers: { 'Authorization': `token ${token}` }
+                });
+                if (getRes.ok) {
+                    const fileData = await getRes.json();
+                    sha = fileData.sha;
+                }
+            } catch (e) {
+                console.log("File likely doesn't exist yet, creating a new one.");
+            }
 
-            const putRes = await fetch(`https://api.github.com/repos/${repo}/contents/config.json`, {
-                method: 'PUT',
-                headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    message: "Update gallery via Admin Dashboard",
-                    content: btoa(JSON.stringify(config, null, 2)),
-                    sha: fileData.sha
-                })
-            });
+            // 2. Properly encode the JSON to Base64 (handles special characters safely)
+            const jsonString = JSON.stringify(config, null, 2);
+            const base64Content = btoa(unescape(encodeURIComponent(jsonString)));
 
-            if(putRes.ok) alert("Site Updating! Give Vercel a minute to rebuild.");
-            else alert("Error saving. Check token/repo path.");
+            // 3. Prepare the update payload
+            const payload = {
+                message: "Update gallery via Admin Dashboard",
+                content: base64Content
+            };
+            if (sha) payload.sha = sha;
+
+            // 4. Send to GitHub
+            try {
+                const putRes = await fetch(`https://api.github.com/repos/${repo}/contents/config.json`, {
+                    method: 'PUT',
+                    headers: { 
+                        'Authorization': `token ${token}`, 
+                        'Content-Type': 'application/json' 
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (putRes.ok) {
+                    alert("Success! Site is updating. Give Vercel a minute or two to rebuild.");
+                } else {
+                    const errorData = await putRes.json();
+                    alert(`GitHub Error: ${errorData.message}\n\nDouble check your Token has 'repo' permissions and your repo path is exactly correct.`);
+                }
+            } catch (error) {
+                alert(`Network error: ${error.message}`);
+            }
         }
 
         loadConfig();
