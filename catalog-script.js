@@ -13,14 +13,12 @@ const exifDisplay = document.getElementById('exif-data');
 const frameDisplay = document.getElementById('frame-num');
 
 document.addEventListener('DOMContentLoaded', () => {
-    fetch('data.json')
+    fetch('config.json')
         .then(res => res.json())
         .then(data => {
             catalogData = data;
             renderAlbums();
-        }).catch(() => {
-            albumList.innerHTML = "<p style='text-align:center; grid-column: 1/-1;'>No data found. Use admin.html to create your first album.</p>";
-        });
+        }).catch(() => console.error("Config not found. Use admin.html."));
 });
 
 function renderAlbums() {
