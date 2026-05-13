@@ -1,3 +1,39 @@
 {
-  "albums": []
+  "albums": [
+    {
+      "title": "Album1",
+      "folder": "Album1",
+      "cover": "1.webp",
+      "photos": [
+        {
+          "file": "1.webp",
+          "exif": ""
+        },
+        {
+          "file": "2.webp",
+          "exif": ""
+        },
+        {
+          "file": "3.webp",
+          "exif": ""
+        },
+        {
+          "file": "4.webp",
+          "exif": ""
+        },
+        {
+          "file": "5.webp",
+          "exif": ""
+        },
+        {
+          "file": "6.webp",
+          "exif": ""
+        },
+        {
+          "file": "7.webp",
+          "exif": ""
+        }
+      ]
+    }
+  ]
 }
